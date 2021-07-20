@@ -60,8 +60,30 @@ func main() {
 		fmt.Println(err.Error())
 	}
 
+	// ObjectID = 60f70baf04a2c03f2c464799
+	// made up of 12 bytes
+	// contains information about timestamp, machine id, process id, counter
+
+	// BSON (Binary Encoded Json), includes additional types e.g. int, long, date, floating point.
+	// bson.D = ordered document bson.D{{"hello", "world"}}
+	// bson.M = unordered document/map bson.M{"hello": "world"}
+	// bson.A = array bson.A{"element 1", "element 2"}
+	// bson.E = usually used as an element inside bson.D
+
 	db := client.Database("tronics")
 	collection := db.Collection("products")
+
+	// res, err := collection.InsertOne(context.Background(), trimmer)
+	// res, err := collection.InsertOne(context.Background(), bson.D{
+	//   {"name", "eric"},
+	//   {"surname", "cartman"},
+	//   {"hobbies", bson.A{"videogame", "alexa", "kfc"}},
+	// })
+	// res, err := collection.InsertOne(context.Background(), bson.M{
+	//   {"name": "eric"},
+	//   {"surname": "cartman"},
+	//   {"hobbies": bson.A{"videogame", "alexa", "kfc"}},
+	// })
 
 	res, err := collection.InsertOne(context.Background(), iphone10)
 	if err != nil {
