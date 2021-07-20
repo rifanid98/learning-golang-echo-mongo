@@ -159,4 +159,35 @@ func main() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	// Update operator for Field
+	updateFieldCon := bson.M{"$set": bson.M{"IsEssential": "false"}}
+	updateFieldRes, err := collection.UpdateMany(context.Background(), bson.M{}, updateFieldCon)
+	_ = err
+	fmt.Println(updateFieldRes.ModifiedCount)
+
+	// Update operator for Array
+	updateArrayCon := bson.M{"$addToSet": bson.M{"accessories": "manual"}}
+	updateArrayRes, err := collection.UpdateMany(context.Background(), arrayFilter, updateArrayCon)
+	_ = err
+	fmt.Println(updateArrayRes)
+
+	// Update operator for field - multiple operators
+	incCon := bson.M{
+		"$mul": bson.M{
+			"price": 1.20,
+		},
+	}
+	incRes, err := collection.UpdateMany(context.Background(), bson.M{}, incCon)
+	_ = err
+	fmt.Println(incRes.MatchedCount)
+
+	// Delete operator
+	delRes, err := collection.DeleteMany(context.Background(), arrayFilter)
+	_ = err
+	fmt.Println(delRes.DeletedCount)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
