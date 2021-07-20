@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -85,10 +86,77 @@ func main() {
 	//   {"hobbies": bson.A{"videogame", "alexa", "kfc"}},
 	// })
 
+	// InsertOne
 	res, err := collection.InsertOne(context.Background(), iphone10)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-
 	fmt.Println(res.InsertedID.(primitive.ObjectID).Timestamp())
+
+	// InsertMany
+	resMany, err := collection.InsertMany(context.Background(), []interface{}{*iphone10, *trimmer})
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	fmt.Println(resMany.InsertedIDs)
+
+	// Equality operator using FindOne
+	var findOne Product
+	err = collection.FindOne(context.Background(), bson.M{"price": 900}).Decode(&findOne)
+	_ = err
+	fmt.Println(findOne)
+
+	// Comparison operator using Find
+	var find Product
+	findCursor, err := collection.Find(context.Background(), bson.M{"price": bson.M{"$gt": 100}})
+	_ = err
+	for findCursor.Next(context.Background()) {
+		err := findCursor.Decode(&find)
+		_ = err
+		fmt.Println(find.Name)
+	}
+
+	// Logical operator using Find
+	var findLogic Product
+	logicFilter := bson.M{
+		"$and": bson.A{
+			bson.M{"price": bson.M{"$gt": 100}},
+			bson.M{"quantity": bson.M{"$gt": 30}},
+		},
+	}
+	findLogicRes, err := collection.Find(context.Background(), logicFilter)
+	_ = err
+	for findLogicRes.Next(context.Background()) {
+		err := findLogicRes.Decode(&findLogic)
+		_ = err
+		fmt.Println(findLogic.Name)
+	}
+
+	// Element operator using Find
+	var findElement Product
+	elementFilter := bson.M{
+		"accessories": bson.M{"exists": true},
+	}
+	findElementRes, err := collection.Find(context.Background(), elementFilter)
+	_ = err
+	for findElementRes.Next(context.Background()) {
+		err := findElementRes.Decode(&findElement)
+		_ = err
+		fmt.Println(findElement.Name)
+	}
+
+	// Array operator using Find
+	var findArray Product
+	arrayFilter := bson.M{"accessories": bson.M{"$all": bson.A{"charger"}}}
+	findArrayRes, err := collection.Find(context.Background(), arrayFilter)
+	_ = err
+	for findArrayRes.Next(context.Background()) {
+		err := findArrayRes.Decode(&findArray)
+		_ = err
+		fmt.Println(findArray.Name)
+	}
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
