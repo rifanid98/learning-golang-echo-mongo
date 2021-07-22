@@ -3,7 +3,9 @@ package example
 import (
 	"context"
 	"errors"
+	"fmt"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -31,4 +33,22 @@ func insertData(collection CollectionAPI, user *User) (*mongo.InsertOneResult, e
 		return res, err
 	}
 	return res, nil
+}
+
+func findData(colelction CollectionAPI) ([]User, error) {
+	var users []User
+	ctx := context.Background()
+
+	cur, err := colelction.Find(ctx, bson.M{})
+	if err != nil {
+		fmt.Printf("find error : %+v\n", err)
+		return users, err
+	}
+
+	fmt.Printf("cursor :%+v\n", cur.Current)
+	err = cur.All(ctx, &users)
+	if err != nil {
+		return users, err
+	}
+	return users, nil
 }
